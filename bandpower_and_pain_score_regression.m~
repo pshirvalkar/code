@@ -123,12 +123,12 @@ hold all
     [coeffACC(:,b),BINT,R,RINT,ACCbandSTATS(b,:)] = regress(Y,X);
     x2=linspace(min(LFPspectra.accbandpower{b}),max(LFPspectra.accbandpower{b}),100);
     plot(x2,(coeffACC(2,b).*x2 + coeffACC(1,b)),'r'); 
-    text(max(LFPspectra.accbandpower{b}),8,{'R^2 =' num2str(ACCbandSTATS(b,1)),'p = ' num2str(ACCbandSTATS(b,3))}); %R^2 is first value, p is 3rd (mult comparisons, multiple p by 6)
+    text(max(LFPspectra.accbandpower{b}),8,{'R^2 =' num2str(ACCbandSTATS(b,1)),'p = ' num2str(ACCbandSTATS(b,3)*6)}); %R^2 is first value, p is 3rd (
 scatter(x1,Y,150,'.');
 title(bands{b});ylabel('Pain Score');xlabel('Power')
     
     %OFC
-eval(['LFPspectra.ofcbandpower{b} = ' spectral_op '(OFCspectra(' bands{b} ',:));']);
+eval(['LFPspectra.ofcbandpower{b} = ' spectra_op '(OFCspectra(' bands{b} ',:));']);
 figure(2)
 subplot(3,2,b)
 hold all

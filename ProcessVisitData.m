@@ -16,23 +16,27 @@ function ProcessVisitData(varargin)
 % 2) creates a Task json in the parent folder (this is easier to read
 % than XML for quick reference)
 % 3) Creates session jsons that must be populated as well. 
-
-% VARARGIN - (input dir, output dir) 
-% if dir exists, use that, otherwise, ask for dir
 %
+% INPUTS:
+%     Input Directory (Recording session folder to add)
+%     Output directory (where to put processed files)
+%     Patient ID - eg. 'CP1', 'CP2' etc.
+% 
 %Prasad Shirvalkar, mdphd, updated 3/2018
 %
 %Adapted from Roee Gilron's scripts- 2017 - (aka. Roee's addBrainaRadioVisit)
 clc
 ph1=what;
 [r1,r2,r3]=fileparts(ph1.path);
-if nargin == 2
+if nargin == 3
     dirorganize = varargin{1};
     processfolder = varargin{2};
+    ptID = varargin{3};
 else
     disp('Choose Recording Session Folder to add')
     dirorganize = uigetdir([r1 '/data/']);
     processfolder = fullfile(r1,'data','processed/');
+    disp('enter patient ID (CP1, CP2) as third input)')
 
 end
    disp(['Organized data will be output to ...' r1(end-3:end) '/data/processed/'])
@@ -155,15 +159,16 @@ if size(xmlhold,2)>1 %if there are more than just montage files..
 montageonly = 0;
 xmlTable = struct2table(xmlhold(~xmlindM));
         
-% Load Painscores from text messaging file (created by painscoreimport.m)
+% Load Painscores from text messaging file and patient ID from input 3 abvoe (created by painscoreimport.m)
 load painscores.mat
+eval(['pt_pain = painScores.' ptID]);
 
 %% Assign Tasks, Pain scores etc to Task files (GETVISITDETAILS here, which opens user input table)
 % Open excelfile for Pain Score reference if needed.
 system(['open -a "Microsoft Excel" All_Text_data.xlsx'])
 
         %xmltable input => compTab output
-        compTable = getVisitDetails(xmlTable,painScores); % user input visit conditions - med, task status, pain Score etc into a pop-up UI TABLE
+        compTable = getVisitDetails(xmlTable,pt_pain); % user input visit conditions - med, task status, pain Score etc into a pop-up UI TABLE
         compTab = cell2table(compTable);
         compTab.Properties.VariableNames = {'fn','Time','Dur','Fs','Contacts','Task','Med','MedName','Painscore','TimeFromMed'};
        

@@ -28,7 +28,7 @@ function [LFP,LFPmeta]=combine_montage_data(patientID)
 %            
 %
 %  prasad shirvalkar mdphd 3/8/2018
-clear
+
 montagepath=['/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/' patientID '/data/processed/montage/'];
 montagesubpath=strsplit(genpath(montagepath),':');
 

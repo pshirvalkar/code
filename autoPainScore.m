@@ -16,6 +16,9 @@ function LFPmeta=autoPainScore(LFPmeta,painScores,timedur)
 % This should be incorporated into getvisitdetails so that autopainscore is
 % flagged
 
+LFPmeta = rmfield(LFPmeta,'paintime');
+LFPmeta = rmfield(LFPmeta,'autopain');
+LFPmeta = rmfield(LFPmeta,'autopaintime');
 
 
 
@@ -29,20 +32,38 @@ for x= 1:length(LFPmeta.time)
                 painscoreMatch=timediff<hold_duration;
                 
                 if sum(painscoreMatch)>0
-                    holdpain=painScores{2}(painscoreMatch);
-                    LFPmeta.autopain(x) = max(holdpain); %if more than 1 score take the higher one
+                         holdpain=painScores{2}(painscoreMatch);
+                         [i1,j1]= max(holdpain); %if more than 1 score take the higher one
+                    LFPmeta.autopain(x) = i1;
                     LFPmeta.painmatch(x)=1;
+                         holdpaintime = painScores{1}(painscoreMatch);
+                    LFPmeta.autopaintime(x,:)= holdpaintime(j1);
                 else
                     LFPmeta.autopain(x)=nan;
                     LFPmeta.painmatch(x)=0;
+                    LFPmeta.autopaintime(x,:)= NaT;
                 end
-                     
-                
-
-                
+     
+% Find the pain time that was manually entered, always within 8 hours max
+% (usually 1-2)
+               if LFPmeta.pain(x)>0
+                p=painScores{2};
+                ind_pain_scores=(LFPmeta.pain(x) == p);
+                ind_pain_times=abs(painScores{1}-LFPmeta.time(x))<(duration(8,0,0));
+                t2 = painScores{1}(ind_pain_scores & ind_pain_times);
+                LFPmeta.paintime(x)= t2(1);
+            
+               else
+                   LFPmeta.paintime(x)=LFPmeta.time(x);
+               end
+               
 end
 
 
-LFPmeta.autopain=LFPmeta.autopain(~isnan(LFPmeta.autopain));
 
+LFPmeta.autopain=LFPmeta.autopain(~isnan(LFPmeta.autopain));
+LFPmeta.autopaintime=LFPmeta.autopaintime(~isnat(LFPmeta.autopaintime));
+
+
+disp([num2str(length(LFPmeta.autopain)) ' Pain Scores Auto-matched'])
 end

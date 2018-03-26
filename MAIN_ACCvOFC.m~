@@ -54,10 +54,9 @@ params.fpass=[0 100];
 toc
 
 mC=mean(C);
-LFPmeta.painmatch=logical(LFPmeta.painmatch);
 
 close all
-scatter(mC(LFPmeta.painmatch),LFPmeta.autopain,150,'k.');
+scatter(mC(LFPmeta.p,LFPmeta.autopain,150,'k.');
 title('Coherence between ACC and OFC across all bands (1-100 Hz) vs Pain Score')
 xlabel('Coherence')
 ylabel('Pain Score')
@@ -125,7 +124,7 @@ hi=bandlims{bb}(2);
 
 clear CC 
 
-indnum=find(LFPmeta.painmatch);
+indnum=find(PainInd);
     for x=1:length(indnum)
         a=LFP.acc(:,indnum(x));
         b=LFP.ofc(:,indnum(x));
@@ -152,11 +151,10 @@ indnum=find(LFPmeta.painmatch);
 figure (10)
 subplot (3,2,bb)
  title([num2str(lo) '-' num2str(hi) ' Hz'])
- plot(CC,LFPmeta.autopain,'b.','markersize',10)
+ plot(CC,LFPmeta.pain(PainInd),'b.','markersize',10)
  xlim([-.5 1])
  ylabel('Pain Score')
  xlabel('Analytic Amplitude Correlation')
- title(bands{bb})
  
 end
 
