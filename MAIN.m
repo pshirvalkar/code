@@ -16,8 +16,8 @@ combine_montage_data(PATIENTID)
 
 %%  HOME FILES  Basic Analyses - Generate Power Spectra and divide bands of interest
 PATIENTID = 'CP1';
-TIME_match = 5;
-
+TIME_match = 10;
+Time_to_compute = 10; %how many seconds of data to use?
 
 
 
@@ -32,7 +32,7 @@ load([homepath 'LFPhome.mat'])
 load painscores.mat
 eval(['PS = painScores.' PATIENTID ';']);
 LFPmeta = autoPainScore(LFPmeta,PS,TIME_match); %get indices of pain scores that are auto-matched, last val = #min to search for texted pain score to match
-LFPspectra = home_spectra(LFP,LFPmeta);
+LFPspectra = home_spectra(LFP,LFPmeta,Time_to_compute);
 
 
 nozero=LFPmeta.pain>0; % exclude sleep trials
@@ -66,7 +66,7 @@ homepath='/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/CP1/da
 addpath(homepath)
 load LFPhome.mat
 load LFPspectra 
-LFPspectra=bandpower_and_pain_score_regression(LFPspectra,LFPmeta,'relative');
+LFPspectra=bandpower_and_pain_score_regression(LFPspectra,LFPmeta,'autopain');
 
 % save([homepath 'LFPspectra.mat'],'LFPspectra')
 
@@ -80,70 +80,28 @@ clear
 load LFPspectra 
 load LFPhome
 
-PAINSCORES=LFPmeta.autopain;
-ACCSPECTRA=LFPspectra.autozacc;
-OFCSPECTRA=LFPspectra.autozofc;
-
-% % RELATIVE POWER
-%             PAINSCORES=LFPmeta.autopain;
-%             LFPmeta.painmatch = logical(LFPmeta.painmatch);
-%             ACCSPECTRA=LFPspectra.acc(:,LFPmeta.painmatch) ./ sum(LFPspectra.acc(:,LFPmeta.painmatch));
-%             OFCSPECTRA=LFPspectra.ofc(:,LFPmeta.painmatch) ./ sum(LFPspectra.ofc(:,LFPmeta.painmatch));
-%             
-
-% %non-zscored power 
-% imagesc(1:numtrials,LFPspectra.fq(:,1),LFPspectra.acc)
-% set(gca,'Ydir','normal')
-% title('Spectra ordered by session')
-% xlabel('Session'); ylabel('Frequency(Hz)')
-
-numtrials=length(PAINSCORES);
-%sort the columns by pain score
-[painsort,painsortindex] = sort(PAINSCORES);
-
-imagesc(1:numtrials,LFPspectra.fq(:,1),ACCSPECTRA(:,painsortindex));
-colorbar
-hold all 
-plot(PAINSCORES(painsortindex).*10,'w.','markersize',20) %scatter the pain scores
-xlabel('Session') 
-ylabel('Frequency or Pain Score x 10')
-title('ACC zscored power spectra')
-set(gca,'Ydir','normal')
-set(gcf,'position',[300 200 500 400])
-% caxis([-2 3])
-
-figure
-imagesc(1:numtrials,LFPspectra.fq(:,1),OFCSPECTRA(:,painsortindex));
-colorbar
-hold all 
-plot(PAINSCORES(painsortindex).*10,'w.','markersize',20) %scatter the pain scores
-xlabel('Session') 
-ylabel('Frequency or Pain Score x 10')
-title('OFC zscored power spectra')
-set(gca,'Ydir','normal')
-set(gcf,'position',[800 200 500 400])
-% caxis([-2 3])
+plot_session_spectra_vs_painscores(LFPspectra,LFPmeta,'autopain')
 
 
-
-
-
-%% calculate spectrograms and save
-
-params.tapers = [5 7];
+%% calculate spectrograms  only for auto pain scores and save
+params.tapers = [30 50];
 params.Fs=422;
-params.pad=-1;
+params.pad=0;
 params.fpass=([0 100]);
-   
-    [Sacc,t1acc,fq]= mtspecgramc(LFP.acc,[5 0.5],params);
-%     figure (3)
-%     subplot(3,2,f)
-%     imagesc(t1{f},fq,(log10(S{f}'))); axis xy; colorbar; 
-%     caxis ([-10 -4]); text(10,90,sprintf('Contacts %d - %d',ACCleads(f,1),ACCleads(f,2)),'color','w');
-    
-    [Sofc,t1ofc,fq]= mtspecgramc(LFP.ofc,[5 0.5],params);
-%     figure (4)
-%     subplot(3,2,f)
-%     imagesc(t1{f},fq,(log10(S{f}'))); axis xy; colorbar; 
-%     caxis ([-10 -4]); text(10,90,sprintf('Contacts %d - %d',ACCleads(f,1)+8,ACCleads(f,2)+8),'color','w'    )
+params.windows = [5 1]; %window, winstep
+
+calculate_spectrograms_autopain(LFP,LFPmeta,params)
+
+load CP1specgram.mat
+plot_session_spectrograms_with_painscores
+
+
+
+
+
+
+
+
+
+
 

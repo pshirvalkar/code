@@ -153,9 +153,9 @@ LFPspectra_out=LFPspectra;
 
 figure(1)
 set(1,'Position',[0 0 751 840])
-suptitle('ACC')
+suptitle(['ACC - ' varargin{1}])
 
 figure(2)
-suptitle('OFC')
+suptitle(['OFC - ' varargin{1}])
 set(2,'Position',[850 0 751 840])
 

@@ -1,10 +1,11 @@
 %Plot all the raw LFP data together in one plot for ACC and OFC 
 
-
-for x=1:size(LFPspectra.acc,2)
+load LFPspectra
+for x=31
    figure (1)
    x1=linspace(0,60,size(LFP.acc,1));
-   plot(x1,LFP.acc(:,x)+(x*0.1))
+   plot(x1,LFP.acc(:,x))
+   ylabel('mV')
       hold all
       
    figure (2) 

@@ -1,12 +1,16 @@
-params.tapers = [30 60]; % Time bandwith product and #tapers
-params.pad=0;
-params.fpass=([0 100]);
-params.Fs= LFPmeta.fs(1);
+% Coherence using mscohere determines cohernece in multiple bands
+% simulataneously.  
+% PRS
+ 
 
-x=25;
+Fs=422;
 
-[n1,f1]= mtspectrumc(LFP.acc(:,x),params);
-[n2,f2]= mtspectrumc(LFP.ofc(:,x),params);
+[Cxy,F]=mscohere(LFP.acc,LFP.ofc,2^(nextpow2(Fs)),...
+    2^(nextpow2(Fs/2)),...
+    2^(nextpow2(Fs)),...
+    Fs);
 
-
-plot(f1,log10(n1))
+idxplot = F > 0 & F < 100; 
+hplot = plot(F(idxplot),Cxy(idxplot,:));
+xlabel('Freq (Hz)');
+ylabel('coherence'); 
