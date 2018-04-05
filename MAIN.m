@@ -7,21 +7,33 @@ ph1=what;
 
 addpath(genpath(fullfile(pwd,'toolboxes')));
 
-ProcessVisitData([r1 '/data/raw_data/Session_2018_03_13_Tuesday/'],[r1 '/data/processed/'],PATIENTID)
+ProcessVisitData([r1 '/data/raw_data/Session_2018_04_03_Tuesday/'],[r1 '/data/processed/'],PATIENTID)
 
 %% Combine the home visit files into one large Mat file. 
 combine_home_data(PATIENTID)
-combine_montage_data(PATIENTID)
+combine_montage_data(PATIENTID) 
 
 
 %%  HOME FILES  Basic Analyses - Generate Power Spectra and divide bands of interest
 PATIENTID = 'CP1';
 TIME_match = 10;
-Time_to_compute = 10; %how many seconds of data to use?
+
+tic
+
+% Zscore the raw LFP to make the power spectra comparable over time/ space
+
+
+%  All_Time_to_compute = [1,2,5,10,15,30,45,59] %how many seconds of data to use?
+%  exportToPPTX('open','Sessionduration_vs_painscore.pptx');
+% for x=1:8
+%     Time_to_compute = All_Time_to_compute(x); %how many seconds of data to use?
+    Time_to_compute = 30;
+close all
 
 
 
-
+% 
+%  exportToPPTX
 ph1=what;
 [r1,r2,r3]=fileparts(ph1.path);
 
@@ -60,40 +72,55 @@ disp(['LFPhome saved for ' PATIENTID])
 
 
 %% REGRESSIONS IN BANDS  of interest vs pain score 
-clear
+
 
 homepath='/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/CP1/data/processed/home/';
 addpath(homepath)
 load LFPhome.mat
 load LFPspectra 
-LFPspectra=bandpower_and_pain_score_regression(LFPspectra,LFPmeta,'autopain');
+LFPspectra = bandpower_and_pain_score_regression(LFPspectra,LFPmeta,'autopain');
+
+%              figHandles = get(groot, 'Children');
+%             exportToPPTX('addslide');
+%             exportToPPTX('addtext',['Session duration - ' num2str(Time_to_compute) ' sec']);
+%             exportToPPTX('addslide'); exportToPPTX('addpicture',figHandles(1));    
+%             exportToPPTX('addslide'); exportToPPTX('addpicture',figHandles(2));
+% 
+% close all
 
 % save([homepath 'LFPspectra.mat'],'LFPspectra')
 
 %% Pain score vs spectra: This plots all sessions, vs frequency, organized by Pain score on that session
 
-homepath='/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/CP1/data/processed/home/';
-addpath(homepath)
-
 close all
-clear
-load LFPspectra 
-load LFPhome
+
+% 
+% load LFPspectra 
+% load LFPhome
 
 plot_session_spectra_vs_painscores(LFPspectra,LFPmeta,'autopain')
 
+% 
+%             figHandles = get(groot, 'Children');
+%             exportToPPTX('addslide'); exportToPPTX('addpicture',figHandles(1));    
+%             exportToPPTX('addslide'); exportToPPTX('addpicture',figHandles(2));
+% close all
+% time_loop{x}=LFPspectra;
+% end
+%             exportToPPTX('saveandclose','Sessionduration_vs_painscore.pptx');
 
-%% calculate spectrograms  only for auto pain scores and save
-params.tapers = [30 50];
-params.Fs=422;
-params.pad=0;
-params.fpass=([0 100]);
-params.windows = [5 1]; %window, winstep
-
-calculate_spectrograms_autopain(LFP,LFPmeta,params)
-
-load CP1specgram.mat
-plot_session_spectrograms_with_painscores
+% %% calculate spectrograms  only for auto pain scores and save
+% params.tapers = [30 50];
+% params.Fs=422;
+% params.pad=0;
+% params.fpass=([0 100]);
+% params.windows = [5 1]; %window, winstep
+% 
+% calculate_spectrograms_autopain(LFP,LFPmeta,params)
+% 
+% load CP1specgram.mat
+% plot_session_spectrograms_with_painscores
+% 
 
 
 

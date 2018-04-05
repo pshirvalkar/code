@@ -37,7 +37,7 @@ homeind=1;
 %search for mat files in the subfolders and combine them. 
 for h=2:length(homesubpath)-1
 % Ignore the first entry to homesubpath, which is root directory, and last folder is empty
-    
+
     W=what(homesubpath{h});
     
     if ~isempty(W.mat) %if a mat file exists

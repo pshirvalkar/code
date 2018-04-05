@@ -39,7 +39,7 @@ end
  
 
 % Define the parameters for spectral calculation using Chronux toolbox
-params.tapers = [30 60]; % Time bandwith product and #tapers
+params.tapers = [300 60]; % Time bandwith product and #tapers
 params.pad=0;
 params.fpass=([0 100]);
 params.Fs= LFPmeta.fs(1);
