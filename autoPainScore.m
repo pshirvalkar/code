@@ -16,9 +16,15 @@ function LFPmeta=autoPainScore(LFPmeta,painScores,timedur)
 % This should be incorporated into getvisitdetails so that autopainscore is
 % flagged
 
+if isfield(LFPmeta,'paintime')
 LFPmeta = rmfield(LFPmeta,'paintime');
+end
+if isfield(LFPmeta,'autopain')
 LFPmeta = rmfield(LFPmeta,'autopain');
+end
+if isfield(LFPmeta,'autopaintime')
 LFPmeta = rmfield(LFPmeta,'autopaintime');
+end
 
 
 
