@@ -1,15 +1,19 @@
-tt=painScores.CP2{1}; %pain times 
-pp=painScores.CP2{2}; %pain score 
- 
-dt = diff(tt);
+clear wekaout accS ofcS
 
-d_hour=duration(1,0,0);
-l_delete=dt<d_hour;
+for x=1:99
+    
+    idx_fq = LFPspectra.fq(:,1)>x & LFPspectra.fq(:,1)<x+1;
+    accS(:,x)= mean(LFPspectra.autozacc(idx_fq,:));
+    ofcS(:,x)= mean(LFPspectra.autozofc(idx_fq,:));
+end
 
-
-l_delete2(1)=logical(1); l_delete2(2:length(l_delete)+1)=l_delete;
-
-tt(l_delete2)=[];
-pp(l_delete2)=[];
+wekaout(:,1:size(accS,2))=accS;
+wekaout(:,end+1:size(ofcS,2)*2)=ofcS;
 
 
+
+
+wekaout(:,end+1)=(LFPmeta.autopain)>7';
+
+
+arffwrite('CP1_allfqs',wekaout)

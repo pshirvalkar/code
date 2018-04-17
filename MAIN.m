@@ -1,4 +1,6 @@
 
+
+ 
 PATIENTID = 'CP1';
 %% Process the visit data separately for each session
 painscoreimport
@@ -13,36 +15,51 @@ ProcessVisitData([r1 '/data/raw_data/Session_2018_04_03_Tuesday/'],[r1 '/data/pr
 combine_home_data(PATIENTID)
 combine_montage_data(PATIENTID) 
 
+%% Data cleaning and Preprocessing
+
+homepath=['/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/' PATIENTID '/data/processed/home/'];
+load([homepath 'LFPhome.mat'])
+
+% Highpass > 1 Hz and correct DC offset
+        params.sr=LFPmeta.fs(1); params.lowcutoff=1; %Sampling rate 422 Hz, and highpass above 1 hz
+        LFP.acc=preproc_dc_offset_high_pass(LFP.acc,params); 
+        LFP.ofc=preproc_dc_offset_high_pass(LFP.ofc,params); %highpass > 1 Hz and correct dc offset
+
+% zscore the raw LFP 
+        LFP.zacc = zscore(LFP.acc);
+save([homepath 'LFPhome.mat'],'LFP','LFPmeta')
+
 
 %%  HOME FILES  Basic Analyses - Generate Power Spectra and divide bands of interest
 PATIENTID = 'CP1';
 TIME_match = 10;
-
+Time_to_compute = 30;
+  
 tic
-
-% Zscore the raw LFP to make the power spectra comparable over time/ space
-
-
 %  All_Time_to_compute = [1,2,5,10,15,30,45,59] %how many seconds of data to use?
 %  exportToPPTX('open','Sessionduration_vs_painscore.pptx');
 % for x=1:8
 %     Time_to_compute = All_Time_to_compute(x); %how many seconds of data to use?
-    Time_to_compute = 30;
+  
 close all
 
-
-
-% 
 %  exportToPPTX
+
+% Load the relevant .mat files
 ph1=what;
 [r1,r2,r3]=fileparts(ph1.path);
-
 addpath(genpath(fullfile(pwd,'toolboxes')));
 addpath(genpath([r1 '/data/']));
 homepath=['/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/' PATIENTID '/data/processed/home/'];
 load([homepath 'LFPhome.mat'])
 load painscores.mat
 eval(['PS = painScores.' PATIENTID ';']);
+
+% Zscore the raw LFP if desired to compare local and global signals (USE zLFP)
+zLFP.acc=zscore(LFP.acc);
+zLFP.ofc=zscore(LFP.ofc);
+
+% Compute the spectrum (USE zLFP for zscored RAW data)
 LFPmeta = autoPainScore(LFPmeta,PS,TIME_match); %get indices of pain scores that are auto-matched, last val = #min to search for texted pain score to match
 LFPspectra = home_spectra(LFP,LFPmeta,Time_to_compute);
 
@@ -109,18 +126,18 @@ plot_session_spectra_vs_painscores(LFPspectra,LFPmeta,'autopain')
 % end
 %             exportToPPTX('saveandclose','Sessionduration_vs_painscore.pptx');
 
-% %% calculate spectrograms  only for auto pain scores and save
-% params.tapers = [30 50];
-% params.Fs=422;
-% params.pad=0;
-% params.fpass=([0 100]);
-% params.windows = [5 1]; %window, winstep
-% 
-% calculate_spectrograms_autopain(LFP,LFPmeta,params)
-% 
-% load CP1specgram.mat
-% plot_session_spectrograms_with_painscores
-% 
+%% calculate spectrograms  only for auto pain scores and save
+params.tapers = [30 50];
+params.Fs=422;
+params.pad=0;
+params.fpass=([0 100]);
+params.windows = [5 1]; %window, winstep
+
+calculate_spectrograms_autopain(LFP,LFPmeta,params)
+
+load CP1specgram.mat
+plot_session_spectrograms_with_painscores
+
 
 
 

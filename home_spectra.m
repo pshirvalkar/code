@@ -5,8 +5,10 @@ function LFPspectra = home_spectra(LFPinput,LFPmeta,varargin)
 % INPUTS:
 %   - LFPinput, raw LFP data ie. LFP (from LFPhome.mat file)
 %   - LFPmeta is the associated metadata file
-%   -optional input, # of seconds of data to use from start:number (if
+%   -optional inputs, 
+%          1.  # of seconds of data to use from start:number (if
 %   blank, will use all data)
+
 %
 % OUTPUTS:
 %   - LFPspectra -> Actual multi tapered spectra from Chronux toolbox
@@ -43,15 +45,21 @@ params.tapers = [300 60]; % Time bandwith product and #tapers
 params.pad=0;
 params.fpass=([0 100]);
 params.Fs= LFPmeta.fs(1);
-
+Fs=params.Fs;
 numrecordings = size(LFP.acc,2);
 
 %calculate the spectra and store them in LFPmeta.spectra
 for f=1:numrecordings
+% 
+% [LFPspectra.acc(:,f),LFPspectra.fq(:,f)]= mtspectrumc(LFP.acc(1:fin_ind,f),params);
+% [LFPspectra.ofc(:,f),~]= mtspectrumc(LFP.ofc(1:fin_ind,f),params);
 
-[LFPspectra.acc(:,f),LFPspectra.fq(:,f)]= mtspectrumc(LFP.acc(1:fin_ind,f),params);
-[LFPspectra.ofc(:,f),~]= mtspectrumc(LFP.ofc(1:fin_ind,f),params);
 
+% To use PWELCH...
+       [LFPspectra.acc(:,f),LFPspectra.fq(:,f)] = pwelch(LFP.acc(1:fin_ind,f),Fs,Fs/2,1:100,Fs,'psd');
+       [LFPspectra.ofc(:,f),~] = pwelch(LFP.ofc(1:fin_ind,f),Fs,Fs/2,1:100,Fs,'psd');
+      
+   
 end
 
 %Take LOG10 and then zscore across pain scores
