@@ -3,26 +3,26 @@
 %painscores.mat holds all automated data. use the individual mat files for
 %true verified pain scores. 
 
-addpath(genpath('/Users/prasad/Desktop/ChangLab DATA/DBS CP matlab analysis/CP1/data/processed'));
+addpath(genpath('/Users/prasad/Desktop/ChangLab DATA/DBS CP matlab analysis/CP2/data/processed'));
 
 clear
 close all
-load LFPhome
-
-pp=LFPmeta.autopain;
-tt=LFPmeta.autopaintime;
+% load LFPhome
 % 
-% % for CP2 to remove pain scores with 30 mins of one another
-% load painscores
-% tt=painScores.CP2{1}; %pain times 
-% pp=painScores.CP2{2}; %pain score 
+% pp=LFPmeta.autopain;
+% tt=LFPmeta.autopaintime;
+
+% for CP2 to remove pain scores with 30 mins of one another
+load painscores
+tt=painScores.CP2{1}; %pain times 
+pp=painScores.CP2{2}; %pain score 
 % dt = diff(tt);
 % d_hour=duration(1,0,0);
 % l_delete=dt<d_hour;
 % l_delete2(1)=logical(1); l_delete2(2:length(l_delete)+1)=l_delete;
 % tt(l_delete2)=[];
 % pp(l_delete2)=[];
-% 
+% % 
 % 
  
 figure
@@ -47,7 +47,7 @@ ylabel('Pain Score')
 xlabel('Day')
 
 figure
-histogram(LFPmeta.autopain,10,'normalization','probability')
+% histogram(LFPmeta.autopain,10,'normalization','probability')
 title('Histogram of Numerical Pain Rating Scores')
 ylabel('probability')
 xlabel('Pain Score')

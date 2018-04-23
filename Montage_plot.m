@@ -5,13 +5,19 @@
 
 clear
 close all
-montagepath='/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/CP1/data/processed/montage/';
+
+PATIENTID = 'CP2Lt';
+
+
+montagepath=['/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/' PATIENTID '/data/processed/montage/'];
 load([montagepath 'LFPmontage.mat'])
 
 
+LFP.acc=LFP.acc(2000:end,:);
+LFP.ofc=LFP.ofc(2000:end,:);
 
-
-
+mtime=linspace(0,60,size(LFP.acc,1)); 
+       
 % import the time domain data
 numrecordings = size(LFP.acc,2);
 groupnum=1:6:numrecordings;
@@ -19,33 +25,61 @@ groupnum=1:6:numrecordings;
 
 for f=1:6:numrecordings
 
+    % Find spectrum.
+       Fs=LFPmeta.fs(f);
+       [ACCspec(:,f:f+5),fq] = pwelch(LFP.acc(:,f:f+5),Fs,Fs/2,1:100,Fs,'psd');
+       [OFCspec(:,f:f+5),~] = pwelch(LFP.ofc(:,f:f+5),Fs,Fs/2,1:100,Fs,'psd');
+       
     for p=1:6
-figure(1)
-subplot(6,1,p)
-plot(LFP.acc(:,f+p-1)+(f/6*0.1)); %set(gca,'PlotBoxAspectRatio',[1 0.12 0.12]);
+figure(f)
+subplot(2,1,1)
+plot(mtime,LFP.acc(:,f+p-1)+(p*0.1));
 ylabel('mV')
-xlabel('sec')
-ylim([0 .5])
-text(5,0.1,sprintf(LFPmeta.contacts{f+p-1}(1:4)));
+xlabel('sec'); title('Raw LFP')
+% ylim([-.2 .2])
 hold all
 
-figure(2)
-subplot(6,1,p)
-plot(LFP.acc(:,f+p-1)+(f/6*0.2)); %set(gca,'PlotBoxAspectRatio',[1 0.12 0.12]);
+figure(f+1)
+subplot(2,1,1)
+plot(mtime, LFP.ofc(:,f+p-1)+(p*0.2));
 ylabel('mV')
-xlabel('sec')
-ylim([0 1])
-text(5,0.1,sprintf(LFPmeta.contacts{f+p-1}(6:end)));
+xlabel('sec');title('Raw LFP') 
+% ylim([-.5 .5])
 hold all
 
+
+% get contact pair numbers
+
+Csplit=strsplit(LFPmeta.contacts{p},'/');
+ACCcontact{p}=Csplit{1};
+OFCcontact{p}=Csplit{2};
+
+
+
+       figure(f)
+       subplot(2,1,2)
+       plot(fq,log10(ACCspec(:,f+p-1)),'linewidth',2)
+       xlabel('Freq (Hz)'); ylabel('log 10 mV^2/Hz'); title('Power Spectrum');hold all
+       
+       figure(f+1)
+       subplot(2,1,2)
+       plot(fq,log10(OFCspec(:,f+p-1)),'linewidth',2)
+       xlabel('Freq (Hz)'); ylabel('log 10 mV^2/Hz'); title('Power Spectrum');hold all
     end
 
+    
+    
+ 
+h1=figure(f);set(h1,'Position',[114 42 612 644]);suptitle(['ACC-' datestr(LFPmeta.time(f))]);
+legend(ACCcontact);
+
+h2=figure(f+1);set(h2,'Position',[904 42 612 644]);suptitle(['OFC-' datestr(LFPmeta.time(f))]);
+legend(OFCcontact);
 
 end
 
 
-h1=figure(1);set(h1,'Position',[114 42 612 644]);suptitle('ACC');
-h2=figure(2);set(h2,'Position',[904 42 612 644]);suptitle('OFC');
+
 
 %% Spectrogramc ACC and OFC
 % The distribution of power values in rightward skewed, many more small
@@ -72,22 +106,4 @@ end
 
 h3=figure(3);set(h3,'Position',[114 42 550 644]);suptitle(['ACC lead-' {dirname1(99:end)}])
 h4=figure(4);set(h4,'Position',[904 42 612 644]);suptitle(['OFC strip-' {dirname1(99:end)}])
-%% just plotting
-x=3
-imagesc(t1{x},fq{x},log10(S{x}')); axis xy; colorbar
 
-
-%% Spectrum C
-
- 
-
-params.tapers = [5 9];
-params.Fs=Fs;
-params.pad=-1;
-params.fpass=([0 100]);
-for f= 1:size(rawdata,2)
-    [S{f},fq]= mtspectrumc(rawdata{f}.ACC,params);
-
-    subplot(6,1,f)
-    plot(fq,log10(S{f}')); axis xy; ylim([-10 -2]);
-end

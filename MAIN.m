@@ -1,15 +1,15 @@
 
 
  
-PATIENTID = 'CP1';
+PATIENTID = 'CP2Lt';
 %% Process the visit data separately for each session
 painscoreimport
 ph1=what;
 [r1,r2,r3]=fileparts(ph1.path);
 
 addpath(genpath(fullfile(pwd,'toolboxes')));
-
-ProcessVisitData([r1 '/data/raw_data/Session_2018_04_03_Tuesday/'],[r1 '/data/processed/'],PATIENTID)
+activeinputfolder=uigetdir([r1 '/' PATIENTID '/data/rawdata/']); %here choose the folder to process
+ProcessVisitData([activeinputfolder '/'], [r1 '/' PATIENTID '/data/processed/'],PATIENTID)
 
 %% Combine the home visit files into one large Mat file. 
 combine_home_data(PATIENTID)
@@ -25,15 +25,19 @@ load([homepath 'LFPhome.mat'])
         LFP.acc=preproc_dc_offset_high_pass(LFP.acc,params); 
         LFP.ofc=preproc_dc_offset_high_pass(LFP.ofc,params); %highpass > 1 Hz and correct dc offset
 
-% zscore the raw LFP 
+% zscore the raw LFP and save separately
         LFP.zacc = zscore(LFP.acc);
+        LFP.zofc = zscore(LFP.ofc); 
+        
+        
+        
 save([homepath 'LFPhome.mat'],'LFP','LFPmeta')
 
 
 %%  HOME FILES  Basic Analyses - Generate Power Spectra and divide bands of interest
 PATIENTID = 'CP1';
 TIME_match = 10;
-Time_to_compute = 30;
+Time_to_compute = 15;
   
 tic
 %  All_Time_to_compute = [1,2,5,10,15,30,45,59] %how many seconds of data to use?
@@ -55,17 +59,9 @@ load([homepath 'LFPhome.mat'])
 load painscores.mat
 eval(['PS = painScores.' PATIENTID ';']);
 
-% Zscore the raw LFP if desired to compare local and global signals (USE zLFP)
-zLFP.acc=zscore(LFP.acc);
-zLFP.ofc=zscore(LFP.ofc);
-
-% Compute the spectrum (USE zLFP for zscored RAW data)
+% Compute the spectrum
 LFPmeta = autoPainScore(LFPmeta,PS,TIME_match); %get indices of pain scores that are auto-matched, last val = #min to search for texted pain score to match
-LFPspectra = home_spectra(LFP,LFPmeta,Time_to_compute);
-
-
-nozero=LFPmeta.pain>0; % exclude sleep trials
-LFPmeta.no0pain=LFPmeta.pain(nozero);
+LFPspectra = home_spectra(LFP,LFPmeta,Time_to_compute); %to use z scored LFP add 'z' at end
 
 
 save([homepath 'LFPspectra.mat'],'LFPspectra')

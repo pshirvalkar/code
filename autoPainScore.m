@@ -69,7 +69,8 @@ end
 
 LFPmeta.autopain=LFPmeta.autopain(~isnan(LFPmeta.autopain));
 LFPmeta.autopaintime=LFPmeta.autopaintime(~isnat(LFPmeta.autopaintime));
-
+nozero=LFPmeta.pain>0; % exclude sleep trials
+LFPmeta.no0pain=LFPmeta.pain(nozero);
 
 disp([num2str(length(LFPmeta.autopain)) ' Pain Scores Auto-matched'])
 end

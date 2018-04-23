@@ -106,7 +106,7 @@ while f <= size(dattablSort,1)
         
         montageonly =1; %reports if folder only contains only montage files
         xmlhold(grpcnt).Task = 'montage'; 
-        montagedirmove=[processfolder 'montage/' dattablSort.fn{f}(1:14)];
+        montagedirmove=[processfolder 'montage/' dattablSort.fn{f}(1:(length(ptID)+11))];
         warning('off','MATLAB:MKDIR:DirectoryExists'); %turn off this dumb warning
         mkdir(montagedirmove);
         idxm = f;
@@ -161,7 +161,13 @@ xmlTable = struct2table(xmlhold(~xmlindM));
         
 % Load Painscores from text messaging file and patient ID from input 3 abvoe (created by painscoreimport.m)
 load painscores.mat
-eval(['pt_pain = painScores.' ptID]);
+if strncmp(ptID,'CP2',3)
+    ptID2='CP2';
+else
+    ptID2=ptID;
+end
+
+eval(['pt_pain = painScores.' ptID2]);
 
 %% Assign Tasks, Pain scores etc to Task files (GETVISITDETAILS here, which opens user input table)
 % Open excelfile for Pain Score reference if needed.

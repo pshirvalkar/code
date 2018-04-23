@@ -8,10 +8,11 @@ function LFPspectra = home_spectra(LFPinput,LFPmeta,varargin)
 %   -optional inputs, 
 %          1.  # of seconds of data to use from start:number (if
 %   blank, will use all data)
-
+%          2.  'z' will use z scored LFP (not raw) (but use 60, 'z')
+%                   i.e.) must use all optional inputs or none
 %
 % OUTPUTS:
-%   - LFPspectra -> Actual multi tapered spectra from Chronux toolbox
+%   - LFPspectra -> Actual power spectra from either Pwelch or Chronux toolbox
 %     The final spectra are LOG10 and variably zscored across pain scores
 %           LFPspectra.(z)acc
 %           LFPspectra.(z)ofc
@@ -29,13 +30,18 @@ tic
 LFP=LFPinput;
 addpath(genpath(fullfile(pwd,'toolboxes')));
 
-if ~isempty(varargin)
-    
-    fin_ind = LFPmeta.fs(1)*varargin{1};
+if ~isempty(varargin) && length(varargin)==1
+      fin_ind = LFPmeta.fs(1)*varargin{1};
+      accLFP = LFP.acc;
+      ofcLFP = LFP.ofc;
+elseif ~isempty(varargin) && length(varargin)==2
+      fin_ind = LFPmeta.fs(1)*varargin{1};
+      accLFP = LFP.zacc;
+      ofcLFP = LFP.zofc;
 else
     fin_ind=size(LFP.acc,1);
-    
-    
+    accLFP = LFP.acc;
+    ofcLFP = LFP.ofc; 
 end
 
  
@@ -50,14 +56,15 @@ numrecordings = size(LFP.acc,2);
 
 %calculate the spectra and store them in LFPmeta.spectra
 for f=1:numrecordings
-% 
-% [LFPspectra.acc(:,f),LFPspectra.fq(:,f)]= mtspectrumc(LFP.acc(1:fin_ind,f),params);
-% [LFPspectra.ofc(:,f),~]= mtspectrumc(LFP.ofc(1:fin_ind,f),params);
+
+% To use mtspectrum (chronux)...
+% [LFPspectra.acc(:,f),LFPspectra.fq(:,f)]= mtspectrumc(accLFP(1:fin_ind,f),params);
+% [LFPspectra.ofc(:,f),~]= mtspectrumc(ofcLFP(1:fin_ind,f),params);
 
 
 % To use PWELCH...
-       [LFPspectra.acc(:,f),LFPspectra.fq(:,f)] = pwelch(LFP.acc(1:fin_ind,f),Fs,Fs/2,1:100,Fs,'psd');
-       [LFPspectra.ofc(:,f),~] = pwelch(LFP.ofc(1:fin_ind,f),Fs,Fs/2,1:100,Fs,'psd');
+       [LFPspectra.acc(:,f),LFPspectra.fq(:,f)] = pwelch(accLFP(1:fin_ind,f),Fs,Fs/2,1:100,Fs,'psd');
+       [LFPspectra.ofc(:,f),~] = pwelch(ofcLFP(1:fin_ind,f),Fs,Fs/2,1:100,Fs,'psd');
       
    
 end
