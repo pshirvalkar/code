@@ -8,7 +8,7 @@ function LFPspectra = home_spectra(LFPinput,LFPmeta,varargin)
 %   -optional inputs, 
 %          1.  # of seconds of data to use from start:number (if
 %   blank, will use all data)
-%          2.  'z' will use z scored LFP (not raw) (but use 60, 'z')
+%          2.  'z' will use z scored LFP (not raw) (but use [], 'z')
 %                   i.e.) must use all optional inputs or none
 %
 % OUTPUTS:
@@ -30,12 +30,16 @@ tic
 LFP=LFPinput;
 addpath(genpath(fullfile(pwd,'toolboxes')));
 
-if ~isempty(varargin) && length(varargin)==1
+if ~isempty(varargin{1}) && length(varargin)==1
       fin_ind = LFPmeta.fs(1)*varargin{1};
       accLFP = LFP.acc;
       ofcLFP = LFP.ofc;
-elseif ~isempty(varargin) && length(varargin)==2
+elseif ~isempty(varargin{1}) && length(varargin)==2
       fin_ind = LFPmeta.fs(1)*varargin{1};
+      accLFP = LFP.zacc;
+      ofcLFP = LFP.zofc;
+elseif isempty(varargin{1}) && length(varargin)==2
+      fin_ind = size(LFP.acc,1);
       accLFP = LFP.zacc;
       ofcLFP = LFP.zofc;
 else
@@ -47,7 +51,7 @@ end
  
 
 % Define the parameters for spectral calculation using Chronux toolbox
-params.tapers = [300 60]; % Time bandwith product and #tapers
+params.tapers = [60 100]; % Time bandwith product and #tapers
 params.pad=0;
 params.fpass=([0 100]);
 params.Fs= LFPmeta.fs(1);
@@ -56,11 +60,9 @@ numrecordings = size(LFP.acc,2);
 
 %calculate the spectra and store them in LFPmeta.spectra
 for f=1:numrecordings
-
-% To use mtspectrum (chronux)...
+% % To use mtspectrum (chronux)...
 % [LFPspectra.acc(:,f),LFPspectra.fq(:,f)]= mtspectrumc(accLFP(1:fin_ind,f),params);
 % [LFPspectra.ofc(:,f),~]= mtspectrumc(ofcLFP(1:fin_ind,f),params);
-
 
 % To use PWELCH...
        [LFPspectra.acc(:,f),LFPspectra.fq(:,f)] = pwelch(accLFP(1:fin_ind,f),Fs,Fs/2,1:100,Fs,'psd');
@@ -73,7 +75,7 @@ end
 LFPspectra.acc= log10(LFPspectra.acc);
 LFPspectra.ofc= log10(LFPspectra.ofc);
 LFPspectra.zacc= zscore(LFPspectra.acc,0,2);
-LFPspectra.zofc= zscore(LFPspectra.ofc,0,2);
+LFPspectra.zofc= zscore(LFPspectra.ofc,0,2);    
 
 no0 = LFPmeta.pain>0;
 LFPspectra.no0zacc= zscore(LFPspectra.acc(:,no0),0,2);

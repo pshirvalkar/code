@@ -1,4 +1,4 @@
-function outdat = getVisitDetails(protTable,painScores)
+function outdat = getVisitDetails(protTable,painScores,moodScores)
 %% This function open a gui that allows experimenter to report experimental conditions 
 %  For Activa PC + S 
 
@@ -21,15 +21,18 @@ for r = 1:size(protTable)
     outdata{r,7} = logical(0);
     outdata{r,8} = char(0);
     outdata{r,9} = double(0); %Pain Score 
-    outdata{r,10} = double(0);
+    outdata{r,10} = double(0); %Mood Score 
+    outdata{r,11} = double(0);
     
     %CONSIDER ADDING ANOTHER COLUMN/ FIELD - 1 = autodetected pain score
     
-%             automatically find the pain score corresponding to the file
+%             automatically find the pain score (and Mood score) corresponding to the file
 %             if there is a recorded score +/- 30 mins
                 half_hour=duration(0,30,0);
                 timediff=abs(painScores{1} - outdata{r,2});
+                    moodtimediff=abs(moodScores{1} - outdata{r,2});
                 painscoreMatch=timediff<half_hour;
+                moodscoreMatch=moodtimediff<half_hour;
                 
                 if sum(painscoreMatch)>0
                     holdpain=painScores{2}(painscoreMatch);
@@ -37,7 +40,16 @@ for r = 1:size(protTable)
                 outdata{r,6} = 'home';
                 end
                      
+                if sum(moodscoreMatch)>0
+                    holdmood=moodScores{2}(moodscoreMatch);
+                outdata{r,10} = max(holdmood); %if more than 1 score get max pain score
+                end
+                
+                    
+                
+                
 end
+
 
 
 hfig = figure();
@@ -46,8 +58,8 @@ t = uitable('Parent', hfig);
 t.Position = [0 0 1100 450];
 t.ColumnWidth = {200 150 60 40 100 120 30 80 80 120};
 t.Data = outdata;%protCell; 
-t.ColumnName = {'fn','date','duration','Fs','contacts','task','med','Med Name','PainScore','TimeFromMed (min)'}; 
-t.ColumnEditable = [false false false false false true true true true true];
+t.ColumnName = {'fn','date','duration','Fs','contacts','task','med','Med Name','PainScore','MoodScore','TimeFromMed (min)'}; 
+t.ColumnEditable = [false false false false false true true true true true true];
 t.ColumnFormat = {[] []  [] [] [] {'Pain Activity','Pre-Post Med','home','QST','error'},...
                            [],...
                            [],[]};

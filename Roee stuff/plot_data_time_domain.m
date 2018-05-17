@@ -25,5 +25,5 @@ hyrule = ax.YAxis;
 hxrule = ax.XAxis; 
 
 % format plot - size and fonts 
-formatPlot(htitle,hxlabel,hylabel,hxrule,hyrule,hplot)
+% formatPlot(htitle,hxlabel,hylabel,hxrule,hyrule,hplot)
 end

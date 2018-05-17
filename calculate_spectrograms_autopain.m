@@ -1,4 +1,4 @@
-function calculate_spectrograms_autopain(LFP,LFPmeta,params)
+function calculate_spectrograms_autopain(LFP,LFPmeta,params,PATIENTID)
 % function calculate_spectrograms_autopain(LFP,LFPmeta,params)
 % 
 % This computes spectrograms on the whole dataset and saves the mat file
@@ -8,7 +8,7 @@ function calculate_spectrograms_autopain(LFP,LFPmeta,params)
 % LFPmeta is the metafile from LFPhome.mat
 % params is the Chronux params file (with windows added - window, winstep)
 % 
-% prasad shirvalkar mdphd 3/27/18
+% prasad shirvalkar mdphd 4/23/18
 
 
 
@@ -31,6 +31,6 @@ painind = painind2(j); %sort all the spectra by pain score
 
 toc
 
-homepath='/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/CP1/data/processed/home/';
-save([homepath 'CP1specgram.mat'],'Sacc','Sofc','t1acc','fq','params')
-disp(['Spectrograms saved as CP1specgram.mat'  ]);
+homepath=['/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/' PATIENTID '/data/processed/home/'];
+save([homepath PATIENTID 'specgram.mat'],'Sacc','Sofc','t1acc','fq','params')
+disp(['Spectrograms saved as ' PATIENTID 'specgram.mat'  ]);

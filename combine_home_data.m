@@ -44,15 +44,25 @@ for h=2:length(homesubpath)-1
         fn = cell2mat(strcat(W.path,'/',W.mat));
         load(fn,'taskLFP','taskTab'); 
 
-        for x=1:length(taskLFP) %index this to add them together. 
+        for x=1:length(taskLFP) %index this to add them together. IF there 
+%               is a shorter recording, pad it with zeros so that it fits in 
+%               the matrix
             
-            LFP.acc(:,homeind)= taskLFP(x).ACC;
-            LFP.ofc(:,homeind)= taskLFP(x).OFC;
+numsamp = length(taskLFP(x).ACC);
+
+            LFP.acc(1:numsamp,homeind)= taskLFP(x).ACC;
+            LFP.ofc(1:numsamp,homeind)= taskLFP(x).OFC;
             LFPmeta.time(homeind,:) = taskTab.Time{x};
             LFPmeta.pain(homeind) = taskTab.Painscore(x);
             LFPmeta.fs(homeind) = str2double(taskTab.Fs{x});
-            homeind = homeind+1;
+            LFPmeta.contacts{homeind}=taskTab.Contacts{x};
+         
    
+           a=strcmp(taskTab.Properties.VariableNames,'Moodscore');
+           if sum(a)>0 %if mood scores exist
+            LFPmeta.mood(homeind) = taskTab.Moodscore(x);
+           end
+              homeind = homeind+1;
         end
         
         clear task*
@@ -62,6 +72,6 @@ end
 
 LFPmeta.time = datetime(LFPmeta.time);
 
-LFPout = [homepath 'LFPhome.mat'];
+LFPout = [homepath patientID 'LFPhome.mat'];
 save(LFPout,'LFP','LFPmeta');
-disp('Mat file "LFPhome" saved - Done Combining')
+disp(['Mat file "' patientID 'LFPhome" saved - Done Combining'])

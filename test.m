@@ -1,14 +1,29 @@
-%  Compare pre- post medication states 
+% ACUTE PAIN MAIN FILE 
+% This file will process all Acute Pain Activity related data, for
+% Experiments conducted in clinic, including QST, pain activities, walking
+% etc. 
+% 
+% Because data will be different for each session, each session should have
+% a params file with the events of interest demarcated. 
+% 
+% 
+% 
+% 
+% 
+% 
+
+
+%% Define the Patient ID
 clear
+ 
+PATIENTID = 'CP1';
 
-dirname = fullfile('..','data','raw_data','home pain test');
-% dirname1 = uigetdir(dirname);
-
-Fs=422; %Hz
-duration = 60; %sec
-
-addpath(genpath(fullfile(pwd,'toolboxes')));
-filelist1 = findFilesBVQX(dirname,'*_MR_*.txt');
+if numel(PATIENTID)>3 %for referencing pain scores, times etc, use only PatientID #
+    ptID3=PATIENTID(1:3);
+else
+    ptID3=PATIENTID;
+end
+%%
 
 
 

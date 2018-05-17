@@ -19,7 +19,7 @@ function plot_session_spectra_vs_painscores(LFPspectra,LFPmeta,process_mode)
 % 
 % 
 % 
-% prasad shirvalkar mdphd 3/27/2018
+% prasad shirvalkar mdphd 5/2018
 
 
 
@@ -54,8 +54,8 @@ function plot_session_spectra_vs_painscores(LFPspectra,LFPmeta,process_mode)
      
             PAINSCORES=LFPmeta.autopain;
             LFPmeta.painmatch = logical(LFPmeta.painmatch);
-            ACCspectra=LFPspectra.acc(:,LFPmeta.painmatch) ./ sum(LFPspectra.acc(:,LFPmeta.painmatch));
-            OFCspectra=LFPspectra.ofc(:,LFPmeta.painmatch) ./ sum(LFPspectra.ofc(:,LFPmeta.painmatch));
+            ACCspectra=zscore(LFPspectra.acc(:,LFPmeta.painmatch) ./ sum(LFPspectra.acc(:,LFPmeta.painmatch)),0,2);
+            OFCspectra=zscore(LFPspectra.ofc(:,LFPmeta.painmatch) ./ sum(LFPspectra.ofc(:,LFPmeta.painmatch)),0,2);
         otherwise
     disp('Error in 3rd input')
     end
@@ -69,7 +69,7 @@ numtrials=length(PAINSCORES);
 %sort the columns by pain score
 [~,painsortindex] = sort(PAINSCORES);
 
-imagesc(1:numtrials,LFPspectra.fq(:,1),ACCspectra(:,painsortindex));
+imagesc(1:numtrials,LFPspectra.fq(:,1),ACCspectra(:,painsortindex))
 colorbar
 hold all 
 plot(PAINSCORES(painsortindex).*10,'w.','markersize',20) %scatter the pain scores
@@ -78,7 +78,7 @@ ylabel('Frequency or Pain Score x 10')
 title('ACC zscored power spectra')
 set(gca,'Ydir','normal')
 set(gcf,'position',[300 200 500 400])
-% caxis([-2 3])
+caxis([-2 3])
 
 figure
 imagesc(1:numtrials,LFPspectra.fq(:,1),OFCspectra(:,painsortindex));
@@ -90,4 +90,4 @@ ylabel('Frequency or Pain Score x 10')
 title('OFC zscored power spectra')
 set(gca,'Ydir','normal')
 set(gcf,'position',[800 200 500 400])
-% caxis([-2 3])
+caxis([-2 3])

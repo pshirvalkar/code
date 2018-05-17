@@ -45,9 +45,9 @@ plot(n,pp,'b.','markersize',20);
 set(gca,'xticklabel',b);
 ylabel('Pain Score')
 xlabel('Day')
-
-figure
+% 
+% figure
 % histogram(LFPmeta.autopain,10,'normalization','probability')
-title('Histogram of Numerical Pain Rating Scores')
-ylabel('probability')
-xlabel('Pain Score')
+% title('Histogram of Numerical Pain Rating Scores')
+% ylabel('probability')
+% xlabel('Pain Score')

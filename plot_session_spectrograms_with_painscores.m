@@ -8,8 +8,8 @@ painind = painind2(j); %sort all the spectra by pain score
 % Plot the individual spectrograms with pain scores to see variance in
 % session
 painsorted=LFPmeta.pain(painind);
-zSacc=zscore(log10(Sacc));
-zSofc=zscore(log10(Sofc));
+zSacc=zscore(log10(Sacc),2);
+zSofc=zscore(log10(Sofc),2);
 accLFP=LFP.acc(:,painind).*100;
 ofcLFP=LFP.ofc(:,painind).*100;
 lfp_time = linspace(0,60,size(LFP.acc,1));

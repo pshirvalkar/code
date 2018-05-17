@@ -159,7 +159,7 @@ if size(xmlhold,2)>1 %if there are more than just montage files..
 montageonly = 0;
 xmlTable = struct2table(xmlhold(~xmlindM));
         
-% Load Painscores from text messaging file and patient ID from input 3 abvoe (created by painscoreimport.m)
+% Load Painscores from text messaging file and patient ID from input 3 above (created by painscoreimport.m)
 load painscores.mat
 if strncmp(ptID,'CP2',3)
     ptID2='CP2';
@@ -168,15 +168,17 @@ else
 end
 
 eval(['pt_pain = painScores.' ptID2]);
+eval(['pt_mood = moodScores.' ptID2]);
+
 
 %% Assign Tasks, Pain scores etc to Task files (GETVISITDETAILS here, which opens user input table)
 % Open excelfile for Pain Score reference if needed.
-system(['open -a "Microsoft Excel" All_Text_data.xlsx'])
+% system(['open -a "Microsoft Excel" All_Text_data.xlsx'])
 
         %xmltable input => compTab output
-        compTable = getVisitDetails(xmlTable,pt_pain); % user input visit conditions - med, task status, pain Score etc into a pop-up UI TABLE
+        compTable = getVisitDetails(xmlTable,pt_pain,pt_mood); % user input visit conditions - med, task status, pain Score etc into a pop-up UI TABLE
         compTab = cell2table(compTable);
-        compTab.Properties.VariableNames = {'fn','Time','Dur','Fs','Contacts','Task','Med','MedName','Painscore','TimeFromMed'};
+        compTab.Properties.VariableNames = {'fn','Time','Dur','Fs','Contacts','Task','Med','MedName','Painscore','Moodscore','TimeFromMed'};
        
         diffTasks= unique(compTab.Task);
         

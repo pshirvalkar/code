@@ -70,6 +70,6 @@ end
 
 LFPmeta.time = datetime(LFPmeta.time);
 
-LFPout = [montagepath 'LFPmontage.mat'];
+LFPout = [montagepath patientID 'LFPmontage.mat'];
 save(LFPout,'LFP','LFPmeta');
-disp('Mat file "LFPmontage" saved - Done Combining')
+disp(['Mat file "' patientID 'LFPmontage" saved - Done Combining'])

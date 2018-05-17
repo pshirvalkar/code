@@ -1,20 +1,33 @@
 %  Basic montage Analysis to determine best electode pair  
 % This will plot a montage data from a combined files using
 % combine_montage_data.m
+% 
+% First plot the Raw LFP 
+% Then plot the power spectrum below, to compare across electrodes
+% 
+% 
+% prasad shirvalkar mdphd
+% may 2018
 
 
 clear
 close all
 
-PATIENTID = 'CP2Lt';
+PATIENTID = 'CP2Rt';
 
 
 montagepath=['/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/' PATIENTID '/data/processed/montage/'];
-load([montagepath 'LFPmontage.mat'])
+load([montagepath PATIENTID 'LFPmontage.mat'])
 
-
-LFP.acc=LFP.acc(2000:end,:);
-LFP.ofc=LFP.ofc(2000:end,:);
+ 
+% % Filter out frequencies to bandstop
+% d = designfilt('bandstopiir','FilterOrder',2, ...
+%                'HalfPowerFrequency1',81,'HalfPowerFrequency2',83, ...
+%                'DesignMethod','butter','SampleRate',422);
+            
+         
+LFP.acc=LFP.acc(1000:end,:);
+LFP.ofc=LFP.ofc(1000:end,:);
 
 mtime=linspace(0,60,size(LFP.acc,1)); 
        
@@ -79,31 +92,4 @@ legend(OFCcontact);
 end
 
 
-
-
-%% Spectrogramc ACC and OFC
-% The distribution of power values in rightward skewed, many more small
-% power vals. So, Zscoring isn't strictly applicable, but people do it. 
-
-params.tapers = [5 7];
-params.Fs=Fs;
-params.pad=-1;
-params.fpass=([0 100]);
-for f= 1:size(rawdata,2)
-   
-    [S{f},t1{f},fq]= mtspecgramc(rawdata{f}.ACC,[2 0.2],params);
-    figure (3)
-    subplot(3,2,f)
-    imagesc(t1{f},fq,(log10(S{f}'))); axis xy; colorbar; 
-    caxis ([-10 -4]); text(10,90,sprintf('Contacts %d - %d',ACCleads(f,1),ACCleads(f,2)),'color','w');
-    
-    [S{f},t1{f},fq]= mtspecgramc(rawdata{f}.OFC,[2 0.2],params);
-    figure (4)
-    subplot(3,2,f)
-    imagesc(t1{f},fq,(log10(S{f}'))); axis xy; colorbar; 
-    caxis ([-10 -4]); text(10,90,sprintf('Contacts %d - %d',ACCleads(f,1)+8,ACCleads(f,2)+8),'color','w'    )
-end
-
-h3=figure(3);set(h3,'Position',[114 42 550 644]);suptitle(['ACC lead-' {dirname1(99:end)}])
-h4=figure(4);set(h4,'Position',[904 42 612 644]);suptitle(['OFC strip-' {dirname1(99:end)}])
 

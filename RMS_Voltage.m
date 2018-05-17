@@ -40,4 +40,4 @@ subplot 212
 plot(Eimpedance.date,Eimpedance.vals(7:12,:))
 legend(Eimpedance.contacts(7:12,:))
 title('OFC Electrode Impedances')
-ylabel('Impedance (Ohms)')
+ylabel('Impedance (Ohms)')  

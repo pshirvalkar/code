@@ -1,4 +1,12 @@
-%% Cross spectra
+%% Cross spectra between ACC and OFC
+% This will calculate
+% 1. autocorrelation of ACC spectra from 1 sesion, compared to every other
+% session from session with lowest pain score to highest. 
+% 2. Autocorr for OFC as in 1. 
+% 3. Cross Spectrum of simultaneously recorded ACC-OFC data.
+% 
+% 
+% prasad shirvalkar mdphd
 
 
 PAINSCORES=LFPmeta.autopain;
@@ -9,7 +17,7 @@ OFCSPECTRA=LFPspectra.autozofc;
 numtrials=length(PAINSCORES);
 %sort the columns by pain score
 [painsort,painsortindex] = sort(PAINSCORES);
-
+% painsortindex=(1:100); %(to order by actual date)
 
 c1= corr(ACCSPECTRA(:,painsortindex));
 c2= corr(OFCSPECTRA(:,painsortindex));
@@ -42,7 +50,7 @@ title('ACC-OFC between region, Cross Session Spectral correlation')
 colorbar
 set(gca,'ydir','normal')
 
-%% Evaluate coherency  between ACC and LFP 
+%% Evaluate coherency  between OFC/ACC and LFP 
 tic
 
 params.Fs=422; 
@@ -55,23 +63,33 @@ toc
 
 mC=mean(C);
 LFPmeta.painmatch=logical(LFPmeta.painmatch);
+LFPspectra.ALLcoherence=C;
+
 
 close all
-scatter(mC(LFPmeta.painmatch),LFPmeta.autopain,150,'k.');
+    yy=LFPmeta.pain(LFPmeta.pain>0);
+    xx1=mC(LFPmeta.pain>0)';
+    scatter(xx1,yy,150,'k.'); hold on
+    XX1=[ones(size(xx1)) xx1];
+    [coefC1,BINT1,R1,RINT1,cSTATS1] = regress(yy',XX1);
+    x2=linspace(min(mC),max(mC),100);
+    plot(x2,(coefC1(2).*x2 + coefC1(1)),'r'); 
+    text(max(mC),6,{'R^2 =' num2str(cSTATS1(1)),'p = ' num2str(cSTATS1(3))}); %R^2 is first value, p is 3rd
+
 title('Coherence between ACC and OFC across all bands (1-100 Hz) vs Pain Score')
 xlabel('Coherence')
 ylabel('Pain Score')
 
 
 % Band Limited Coherence
-delta = (f>=1 & f<=4);
+delta = (f>=2 & f<=4);
 theta = (f>4 & f<=8);
 alpha =(f>8 & f<=12);
 beta = (f>12 & f<=30);
-Lgamma =(f>30 & f<=60);
-Mgamma = (f>60 & f<=100);   
-bands= {'delta','theta','alpha','beta','Lgamma','Mgamma'};
-bandlims={[1 4],[4 8],[8 12],[12 30],[30 60],[60 100]};
+Lgamma =(f>30 & f<=70);
+Hgamma = (f>70 & f<=100);   
+bands= {'delta','theta','alpha','beta','Lgamma','Hgamma'};
+bandlims={[2 4],[4 8],[8 12],[12 30],[30 70],[70 100]};
 
 
 
@@ -89,9 +107,9 @@ hold all
 % %     Y=zscore(Y); %use this if you want to zscore the Pain scores
     x1=LFPspectra.coherence{b}(LFPmeta.painmatch)';
     X=[ones(size(x1)) x1];
-    [coeffC(:,b),BINT,R,RINT,cSTATS(b,:)] = regress(Y,X);
+    [coefC(:,b),BINT,R,RINT,cSTATS(b,:)] = regress(Y,X);
     x2=linspace(min(LFPspectra.coherence{b}),max(LFPspectra.coherence{b}),100);
-    plot(x2,(coeffC(2,b).*x2 + coeffC(1,b)),'r'); 
+    plot(x2,(coefC(2,b).*x2 + coefC(1,b)),'r'); 
     text(max(LFPspectra.coherence{b}),6,{'R^2 =' num2str(cSTATS(b,1)),'p = ' num2str(cSTATS(b,3))}); %R^2 is first value, p is 3rd
 scatter(x1,Y,150,'.');
 title(bands{b});ylabel('Pain Score');xlabel('Coherence')
@@ -99,10 +117,14 @@ title(bands{b});ylabel('Pain Score');xlabel('Coherence')
 
 end
 
+% ppt_export([PATIENTID 'general.pptx'])
 
+save([homepath PATIENTID 'LFPspectra.mat'],'LFPspectra')
+save([homepath PATIENTID 'LFPhome.mat'],'LFP','LFPmeta')
+disp(['LFPspectra saved for ' PATIENTID])
+disp(['LFPhome saved for ' PATIENTID])
 
-
-
+  
 
 
 % 
@@ -115,17 +137,25 @@ end
 
 
 %% HILBERT correlations between ACC and OFC
+
+
+bands= {'delta','theta','alpha','beta','Lgamma','Hgamma'};
+bandlims={[2 4],[4 8],[8 12],[12 30],[30 70],[70 100]};
+
+
 tic
+CC=cell(6,1);
 
-
+indnum=find(LFPmeta.painmatch);
 for bb=1:6
 
 lo=bandlims{bb}(1);
 hi=bandlims{bb}(2);
 
-clear CC 
 
-indnum=find(LFPmeta.painmatch);
+CC{bb}=zeros(length(indnum),1);
+
+
     for x=1:length(indnum)
         a=LFP.acc(:,indnum(x));
         b=LFP.ofc(:,indnum(x));
@@ -145,14 +175,14 @@ indnum=find(LFPmeta.painmatch);
         
         
         a123=corrcoef(abs(ha),abs(hb)); %get the correlation coefficient
-        CC(x)=a123(1,2);
+        CC{bb}(x)=a123(1,2);
     end
  
     
 figure (10)
 subplot (3,2,bb)
  title([num2str(lo) '-' num2str(hi) ' Hz'])
- plot(CC,LFPmeta.autopain,'b.','markersize',10)
+ plot(CC{bb},LFPmeta.autopain,'b.','markersize',10)
  xlim([-.5 1])
  ylabel('Pain Score')
  xlabel('Analytic Amplitude Correlation')
