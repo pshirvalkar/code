@@ -32,6 +32,7 @@ if nargin == 3
     dirorganize = varargin{1};
     processfolder = varargin{2};
     ptID = varargin{3};
+    name_len=length(ptID)+11;
 else
     disp('Choose Recording Session Folder to add')
     dirorganize = uigetdir([r1 '/data/']);
@@ -73,7 +74,13 @@ for f = 1:length(fftxt)
     dat(f).contacts=[xmldata.SenseChannelConfig.Channel1.PlusInput xmldata.SenseChannelConfig.Channel1.MinusInput ...
         '/' xmldata.SenseChannelConfig.Channel3.PlusInput xmldata.SenseChannelConfig.Channel3.MinusInput];
 end
-datTable = struct2table(dat); %take the structure and make it a table to use
+
+if length(dat)>1  %to format the table into cells if only one entry
+    datTable = struct2table(dat); %take the structure and make it a table to useelse
+else
+    datTable = struct2table(dat,'AsArray',true); %take the structure and make it a table to useend
+end
+
 %% create groupings
 dattablSort = sortrows(datTable, 'time');
 exts = {'.txt','.xml'};
@@ -141,7 +148,7 @@ while f <= size(dattablSort,1)
 
         % save MAT file HERE
         xmlmTab = struct2table(xmlmontage);
-        save([montagedirmove '/montage-' xmlmontage(idxm).Fn(1:14)],'montageLFP','xmlmTab');
+        save([montagedirmove '/montage-' xmlmontage(idxm).Fn(1:name_len)],'montageLFP','xmlmTab');
         clear raw1 montageLFP
     else % if not montage,  move to next section 
         f = f+1;
@@ -153,12 +160,16 @@ xmltasknames={xmlhold.Task};
 xmlindM=strcmp(xmltasknames,'montage'); %check which files are montage related (montage will only have first file)
 %% What to do with NON-MONTAGE FILES  (everything else)
 
-if size(xmlhold,2)>1 %if there are more than just montage files..
+if size(xmlhold,2)>1 || (xmlindM==0)%if there are more than just montage files..
 %     Find which xml index is from montage and exclude that one for Task ID
 
 montageonly = 0;
+if length(xmlhold)>1  %to format the table into cells if only one entry
 xmlTable = struct2table(xmlhold(~xmlindM));
-        
+else
+xmlTable = struct2table(xmlhold(~xmlindM),'AsArray',true);
+end
+
 % Load Painscores from text messaging file and patient ID from input 3 above (created by painscoreimport.m)
 load painscores.mat
 if strncmp(ptID,'CP2',3)
@@ -178,7 +189,7 @@ eval(['pt_mood = moodScores.' ptID2]);
         %xmltable input => compTab output
         compTable = getVisitDetails(xmlTable,pt_pain,pt_mood); % user input visit conditions - med, task status, pain Score etc into a pop-up UI TABLE
         compTab = cell2table(compTable);
-        compTab.Properties.VariableNames = {'fn','Time','Dur','Fs','Contacts','Task','Med','MedName','Painscore','Moodscore','TimeFromMed'};
+        compTab.Properties.VariableNames = {'fn','Time','Dur','Fs','Contacts','Task','Med','MedName','Painscore','Moodscore','TimeFromMed','StimSide','StimContacts','StimPW','StimFreq','StimAmp','StimDur','Notes'};
        
         diffTasks= unique(compTab.Task);
         
@@ -188,8 +199,8 @@ eval(['pt_mood = moodScores.' ptID2]);
         % Copy each file into the Task Folder assigned to it in the prior step
             for d = 1:size(taskTab)
             
-            taskdir=[processfolder taskTab.Task{d} '/' taskTab.fn{d}(1:14)];
-%only first 14 characters signify unique folder named
+            taskdir=[processfolder taskTab.Task{d} '/' taskTab.fn{d}(1:name_len)];
+%only first length(ptID+11) [14(for CP1) or 16(for CP2Lt)] characters signify unique folder named
             mkdir(taskdir);
             copyfile([dirorganize taskTab.fn{d} '.txt'],taskdir); 
             copyfile([dirorganize taskTab.fn{d} '.xml'],taskdir);
@@ -204,7 +215,7 @@ eval(['pt_mood = moodScores.' ptID2]);
         savejson('',table2struct(taskTab),fullfile(taskdir, 'Task-metadata.json'));
         
 %         save Task Mat file 
-        save([taskdir '/task-' taskTab.fn{1}(1:14)],'taskLFP','taskTab');
+        save([taskdir '/task-' taskTab.fn{1}(1:name_len)],'taskLFP','taskTab');
         clear raw1 taskLFP
         end
        

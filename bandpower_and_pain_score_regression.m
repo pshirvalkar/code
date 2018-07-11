@@ -81,6 +81,7 @@ if nargin>2
             PAINSCORES=LFPmeta.autopain;
             ACCspectra=LFPspectra.autozacc;
             OFCspectra=LFPspectra.autozofc;
+
             spectral_op='mean';
             
         case 'relative'
@@ -116,7 +117,7 @@ end
 
 
 for b=1:6 % for each power band
-    
+    b
     %ACC
 eval(['LFPspectra.accbandpower{b} = ' spectral_op '(ACCspectra(' bands{b} ',:));']);
 figure(1)
@@ -127,12 +128,7 @@ hold all
     Y=PAINSCORES(notnan)';
 %     Y=zscore(Y); %use this if you want to zscore the Pain scores
     x1=LFPspectra.accbandpower{b}';
-    X=[ones(size(x1)) x1];
-    [coeffACC(:,b),BINT,R,RINT,ACCbandSTATS(b,:)] = regress(Y,X);
-    x2=linspace(min(LFPspectra.accbandpower{b}),max(LFPspectra.accbandpower{b}),100);
-    plot(x2,(coeffACC(2,b).*x2 + coeffACC(1,b)),'r'); 
-    text(max(LFPspectra.accbandpower{b}),8,{'R^2 =' num2str(ACCbandSTATS(b,1)),'p = ' num2str(ACCbandSTATS(b,3))}); %R^2 is first value, p is 3rd (mult comparisons, multiple p by 6)
-scatter(x1,Y,150,'.');
+    [coeffACC(:,b),~,~,~,ACCbandSTATS(b,:)] = regressplot(Y,x1,6,'text');
 title(bands{b});ylabel('Pain Score');xlabel('Power')
     
     %OFC
@@ -144,12 +140,7 @@ hold all
     Y=PAINSCORES';
     %     Y=zscore(Y); %use this if you want to zscore the Pain scores
     x1=LFPspectra.ofcbandpower{b}';
-    X=[ones(size(x1)) x1];
-    [coeffOFC(:,b),BINT,R,RINT,OFCbandSTATS(b,:)] = regress(Y,X);
-    x2=linspace(min(LFPspectra.ofcbandpower{b}),max(LFPspectra.ofcbandpower{b}),100);
-    plot(x2,(coeffOFC(2,b).*x2 + coeffOFC(1,b)),'r'); 
-    text(max(LFPspectra.ofcbandpower{b}),8,{'R^2 =' num2str(OFCbandSTATS(b,1)),'p = ' num2str(OFCbandSTATS(b,3)*6)}); %R^2 is first value, p is 3rd
-scatter(x1,Y,150,'.');
+    [coeffOFC(:,b),~,~,~,OFCbandSTATS(b,:)] = regressplot(Y,x1,6,'text');
 title(bands{b});ylabel('Pain Score');xlabel('Power')
 
 end

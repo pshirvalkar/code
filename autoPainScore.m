@@ -46,13 +46,15 @@ for x= 1:length(LFPmeta.time)
                 timediff=abs(painScores{1} - holdtime);
                 painscoreMatch=timediff<hold_duration;
                 
-                if sum(painscoreMatch)>0
+                if sum(painscoreMatch)>0 & ~isnan(painScores{2}(painscoreMatch))
                          holdpain=painScores{2}(painscoreMatch);
                          [i1,j1]= max(holdpain); %if more than 1 score take the higher one
+                         
                     LFPmeta.autopain(x) = i1;
                     LFPmeta.painmatch(x)=1;
                          holdpaintime = painScores{1}(painscoreMatch);
                     LFPmeta.autopaintime(x,:)= holdpaintime(j1);
+                   
                 else
                     LFPmeta.autopain(x)=nan;
                     LFPmeta.painmatch(x)=0;

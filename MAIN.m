@@ -1,7 +1,8 @@
 
 clear
  
-PATIENTID = 'CP1';
+PATIENTID = 'CP2Lt';
+
 
 if numel(PATIENTID)>3 %for referencing pain scores, times etc, use only PatientID #
     ptID3=PATIENTID(1:3);
@@ -14,7 +15,7 @@ homepath=['/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/' PAT
 load([homepath PATIENTID 'LFPhome.mat'])
 load([homepath PATIENTID 'LFPspectra.mat'])
 %% Process the visit data separately for each session
-painscoreimport
+painscoreimport 
 ph1=what;
 [r1,r2,r3]=fileparts(ph1.path);
 
@@ -42,18 +43,17 @@ load([homepath PATIENTID 'LFPhome.mat'])
         
       
 save([homepath PATIENTID 'LFPhome.mat'],'LFP','LFPmeta')
-disp([homepath PATIENTID 'LFPhome.mat saved again'])
+disp([PATIENTID 'LFPhome.mat saved again'])
         
 %% Split the recordings by unique electrode contacts and save this index.
 homepath=['/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/' PATIENTID '/data/processed/home/'];
-PATIENTID = 'CP1';
 load([homepath PATIENTID 'LFPhome.mat'])
 
 LFPmeta = contact_sort(LFPmeta); 
 
 
 save([homepath PATIENTID 'LFPhome.mat'],'LFP','LFPmeta')
-disp([homepath PATIENTID 'LFPhome.mat saved '])
+disp([PATIENTID 'LFPhome.mat saved '])
 
 %%  HOME FILES  Basic Analyses - Generate Power Spectra and divide bands of interest 
 TIME_match = 10; %for pain scores auto matching base on time from recording (mins)
@@ -88,7 +88,7 @@ load([homepath PATIENTID 'LFPspectra.mat']);
 
 
 LFPspectra = bandpower_and_pain_score_regression(LFPspectra,LFPmeta,'autopain');
-
+    
 
 % Pain score vs spectra: This plots all sessions, vs frequency, organized by Pain score on that session
 figure
@@ -96,8 +96,15 @@ plot_session_spectra_vs_painscores(LFPspectra,LFPmeta,'autopain')
 
 
 
-% save([homepath PATIENTID 'LFPspectra.mat'],'LFPspectra')
-% disp(['LFPspectra saved for ' PATIENTID])
+save([homepath PATIENTID 'LFPspectra.mat'],'LFPspectra')
+disp(['LFPspectra saved for ' PATIENTID])
+
+%% Decoding of Pain Score based on classifier
+make_feature_vector_decode
+[trainedClsfr,valAccuracy,valScores]=CP1_SVM(wekatable)
+
+
+
 
 %%  Mean Spectra for different pain score values
 %find unique pain scores, index them, compute averaged mtspectra with

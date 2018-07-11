@@ -20,7 +20,7 @@ xmax(1:C)=struct('loc',[]);
 %    end
 % end
 
-for ch=1:C,
+for ch=1:C
    if nargin ==1
      xmax(ch).loc=[xmax(ch).loc; find(data(:,ch)-pp1(:,ch)>=0 & data(:,ch)-pp2(:,ch)>=0)];
    else

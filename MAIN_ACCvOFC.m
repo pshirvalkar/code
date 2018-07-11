@@ -50,7 +50,7 @@ title('ACC-OFC between region, Cross Session Spectral correlation')
 colorbar
 set(gca,'ydir','normal')
 
-%% Evaluate coherency  between OFC/ACC and LFP 
+%% Calculate coherency  between OFC/ACC and LFP in all bands (skip this if done/saved already)
 tic
 
 params.Fs=422; 
@@ -64,21 +64,22 @@ toc
 mC=mean(C);
 LFPmeta.painmatch=logical(LFPmeta.painmatch);
 LFPspectra.ALLcoherence=C;
+LFPspectra.ALLcoherencefq=f;
 
 
 close all
     yy=LFPmeta.pain(LFPmeta.pain>0);
     xx1=mC(LFPmeta.pain>0)';
-    scatter(xx1,yy,150,'k.'); hold on
-    XX1=[ones(size(xx1)) xx1];
-    [coefC1,BINT1,R1,RINT1,cSTATS1] = regress(yy',XX1);
-    x2=linspace(min(mC),max(mC),100);
-    plot(x2,(coefC1(2).*x2 + coefC1(1)),'r'); 
-    text(max(mC),6,{'R^2 =' num2str(cSTATS1(1)),'p = ' num2str(cSTATS1(3))}); %R^2 is first value, p is 3rd
-
+    [coefC1,BINT1,R1,RINT1,cSTATS1] = regressplot(yy',xx1,6);
+   
 title('Coherence between ACC and OFC across all bands (1-100 Hz) vs Pain Score')
 xlabel('Coherence')
 ylabel('Pain Score')
+
+
+%% PLOT within band coherence values
+
+C=LFPspectra.ALLcoherence(:,logical(LFPmeta.painmatch));
 
 
 % Band Limited Coherence
@@ -92,9 +93,6 @@ bands= {'delta','theta','alpha','beta','Lgamma','Hgamma'};
 bandlims={[2 4],[4 8],[8 12],[12 30],[30 70],[70 100]};
 
 
-
-    
-% Calculate within band coherence between ACC-OFC
 for b=1:6 % for each power band
     
     %ACC- OFC coherence
@@ -102,29 +100,26 @@ eval(['LFPspectra.coherence{b} = mean(C(' bands{b} ',:));']);
 figure(2)
 subplot(3,2,b)
 hold all
-%     %regress and plot line
-    Y=LFPmeta.autopain';
-% %     Y=zscore(Y); %use this if you want to zscore the Pain scores
-    x1=LFPspectra.coherence{b}(LFPmeta.painmatch)';
-    X=[ones(size(x1)) x1];
-    [coefC(:,b),BINT,R,RINT,cSTATS(b,:)] = regress(Y,X);
-    x2=linspace(min(LFPspectra.coherence{b}),max(LFPspectra.coherence{b}),100);
-    plot(x2,(coefC(2,b).*x2 + coefC(1,b)),'r'); 
-    text(max(LFPspectra.coherence{b}),6,{'R^2 =' num2str(cSTATS(b,1)),'p = ' num2str(cSTATS(b,3))}); %R^2 is first value, p is 3rd
-scatter(x1,Y,150,'.');
-title(bands{b});ylabel('Pain Score');xlabel('Coherence')
-    
-
+% regress and plot line
+x1=LFPspectra.coherence{b}';
+Y=(LFPmeta.autopain');
+%     Y=zscore(Y); %use this if you want to zscore the Pain scores
+    [coefC(:,b),~,~,~,cSTATS(b,:)] = regressplot(Y,x1,6);
+    title(bands{b});ylabel('Pain Score');xlabel('Coherence')
+   
 end
 
 % ppt_export([PATIENTID 'general.pptx'])
+
+LFPspectra.coherenceregress.stats=cSTATS;
+LFPspectra.coherenceregress.coeff=coefC;
+
 
 save([homepath PATIENTID 'LFPspectra.mat'],'LFPspectra')
 save([homepath PATIENTID 'LFPhome.mat'],'LFP','LFPmeta')
 disp(['LFPspectra saved for ' PATIENTID])
 disp(['LFPhome saved for ' PATIENTID])
 
-  
 
 
 % 
@@ -165,13 +160,13 @@ CC{bb}=zeros(length(indnum),1);
         b2=eegfilt(b',422,lo,hi);
         ha=hilbert(a2);hb=hilbert(b2);
        
-        if (bb==1 && x ==21)
-       figure(11)
-       subplot 211
-       plot(a2); hold all; plot(abs(ha));
-       subplot 212
-       plot(b2); hold all; plot(abs(hb));
-        end
+%         if (bb==1 && x ==21)
+%        figure(11)
+%        subplot 211
+%        plot(a2); hold all; plot(abs(ha));
+%        subplot 212
+%        plot(b2); hold all; plot(abs(hb));
+%         end
         
         
         a123=corrcoef(abs(ha),abs(hb)); %get the correlation coefficient
@@ -182,14 +177,19 @@ CC{bb}=zeros(length(indnum),1);
 figure (10)
 subplot (3,2,bb)
  title([num2str(lo) '-' num2str(hi) ' Hz'])
- plot(CC{bb},LFPmeta.autopain,'b.','markersize',10)
+  Y=LFPmeta.autopain'; x1=CC{bb};
+  regressplot(Y,x1,6);
  xlim([-.5 1])
- ylabel('Pain Score')
- xlabel('Analytic Amplitude Correlation')
+ ylabel('Pain Score'); xlabel('Analytic Amplitude Correlation')
  title(bands{bb})
  
 end
 
 toc
+
+LFPspectra.hilbertcorr=CC;
+
+  save([homepath PATIENTID 'LFPspectra.mat'],'LFPspectra')
+disp(['LFPspectra saved for ' PATIENTID])
 
 

@@ -1,10 +1,12 @@
-function [LFP,LFPmeta]=combine_home_data(patientID)
+function [LFP,LFPmeta]=combine_home_data(patientID,taskname)
 
 %This function will run through all the home visit data and combined the mat
 %files into a large mat file that can be used to analyze all data
 %simulataneously. Pain scores etc and in structure format
 %  
 % INPUTS:   patientID is the ID of patient to process (ie.) 'CP1'
+%           taskname is a string of whatever task folder to organize (eg.
+%           'STIM')
 % 
 % OUTPUTS:
 %           LFP and LFPmeta described below:

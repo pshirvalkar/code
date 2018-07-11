@@ -22,7 +22,14 @@ for r = 1:size(protTable)
     outdata{r,8} = char(0);
     outdata{r,9} = double(0); %Pain Score 
     outdata{r,10} = double(0); %Mood Score 
-    outdata{r,11} = double(0);
+    outdata{r,12} = char(0);
+    outdata{r,13} = char(0);
+    outdata{r,14} = char(0);
+    outdata{r,15} = char(0);
+    outdata{r,16} = char(0);
+    outdata{r,17} = double(0);
+    outdata{r,18} = char(0);
+    
     
     %CONSIDER ADDING ANOTHER COLUMN/ FIELD - 1 = autodetected pain score
     
@@ -58,10 +65,10 @@ t = uitable('Parent', hfig);
 t.Position = [0 0 1100 450];
 t.ColumnWidth = {200 150 60 40 100 120 30 80 80 120};
 t.Data = outdata;%protCell; 
-t.ColumnName = {'fn','date','duration','Fs','contacts','task','med','Med Name','PainScore','MoodScore','TimeFromMed (min)'}; 
-t.ColumnEditable = [false false false false false true true true true true true];
-t.ColumnFormat = {[] []  [] [] [] {'Pain Activity','Pre-Post Med','home','QST','error'},...
-                           [],...
+t.ColumnName = {'fn','date','duration','Fs','contacts','task','med','Med Name','PainScore','MoodScore','TimeFromMed (min)','StimSide','StimContacts','StimPW','StimFreq','StimAmp','StimDur','Notes'}; 
+t.ColumnEditable = [false false false false false true true true true true true true true true true true true true];
+t.ColumnFormat = {[] []  [] [] [] {'Pain Activity','Pre-Post Med','home','QST','STIM','error'},...
+                           [],[],[],[],[],{'Left','Right','Bilateral'},...
                            [],[]};
 
 

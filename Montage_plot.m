@@ -13,7 +13,7 @@
 clear
 close all
 
-PATIENTID = 'CP2Rt';
+PATIENTID = 'CP1';
 
 
 montagepath=['/Users/pshirvalkar/Desktop/ChangLab DATA/DBS CP matlab analysis/' PATIENTID '/data/processed/montage/'];
